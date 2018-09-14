@@ -7,7 +7,7 @@ module.exports.setProfile = function(req, res, next){
       var personId = utils.getPersonId(profileObj);
       var grade = parseInt(personId.substring(0,2)) + 100;
       
-      query.findPerson(personId,function(err,result){
+      query.ShowUserInfo(personId,function(err,result){
           if(err){
                 		throw err;
                 		return;

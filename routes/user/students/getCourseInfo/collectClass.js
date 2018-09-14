@@ -2,7 +2,7 @@ const Teacher = require('./teacher');
 var query = require('../../../../db/msql');
 var courseInfo = {};
 courseInfo.collectCourse = function(req, res, next){
-    query.showCosMapIntro(req.body.cos_cname, function(err,result){
+    query.ShowCosMapIntro(req.body.cos_cname, function(err,result){
         if(err){
 //            return next(err); // haven't handle yet
         }
@@ -40,7 +40,7 @@ courseInfo.addProfiePic = function(req, res, next){
             //console.log(collectResult[i].photo);
             //console.log(collectResult[i]);
             res.locals.collectResult[i] = collectResult[i];
-            //console.log(res.locals.collectResult[i]);
+//            console.log(res.locals.collectResult[i]);
         });
        // console.log("result");
         //console.log(collectResult[i]);

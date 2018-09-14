@@ -25,7 +25,7 @@ router.post('/assistants/graduate/check', csrfProtection, function(req, res){
 
 router.get('/assistants/graduate/check', studentId, function(req, res){
     let personId = res.locals.studentId;
-    query.findPerson(personId, function(err, result){
+    query.ShowUserInfo(personId, function(err, result){
         if(err){
             //////console.log(err);
             res.redirect('/');

@@ -12,7 +12,8 @@ router.get('/students/courses/recommend', StudentId, function(req, res){
     if(req.session.profile){
 
         var studentId = res.locals.studentId;
-        query.getRecommend(studentId, function(err, result){
+        //console.log(studentId);
+        query.ShowRecommendCos(studentId, function(err, result){
                 if(err){
                     throw err;
                     return;
@@ -21,7 +22,6 @@ router.get('/students/courses/recommend', StudentId, function(req, res){
                     res.redirect('/');
 
                 result = JSON.parse(result);
-               // console.log(result);
                 res.send(result);
         });
     }

@@ -75,7 +75,8 @@ methods.getProfile = function(req, res, next){
 	if(body){
 		var studentId = body.username;
         	var email = body.email;
-		query.addEmail(studentId, email);
+		query.SetUserEmail(studentId, email);
+
 	}
         next();
    });
@@ -89,7 +90,7 @@ methods.redirectAfterAuth = function(req, res, next){
                 ////console.log("no student id");
                 return;
             }
-            query.findPerson(personId, function(err, result){
+            query.ShowUserInfo(personId, function(err, result){
 		////console.log(result + typeof(result));
                 if(!result){
                     return;

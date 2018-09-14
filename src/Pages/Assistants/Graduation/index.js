@@ -9,16 +9,19 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 //
 import StudentList from './StudentSearch/StudentList';
 import StudentInform from './StudentInform/StudentSelList';
+import GraduationRule from './GraduationRule'
 
 import FakeData from '../../../Resources/FakeData'
 
-export default class index extends React.Component {
+import { connect } from 'react-redux'
+
+class index extends React.Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            activeKey: '1',
+            activeKey: "1",
             start: 0,
             initStudents: FakeData.StudentList,
             loading: true,
@@ -37,9 +40,9 @@ export default class index extends React.Component {
         });
     }
 
-    onChange = (activeKey) => {
+    onChange = (key) => {
         this.setState({
-            activeKey,
+            activeKey:key
         });
     };
 
@@ -53,7 +56,6 @@ export default class index extends React.Component {
                     onChange={this.onChange}
                 >
                     <TabPane tab={`學生清單`} key="1">
-
                         <StudentList students={this.state.initStudents}/>
                     </TabPane>
                     <TabPane tab={`預審通知`} key="2">
@@ -62,8 +64,17 @@ export default class index extends React.Component {
                             idCard={this.props.idCard}
                         />
                     </TabPane>
+                    {/* <TabPane tab={`預審規則`} key="3">
+                        <GraduationRule />
+                    </TabPane> */}
                 </Tabs>
             </div>
         );
     }
 }
+
+const mapState = (state)=>({
+    idCard: state.Assistant.User.idCard
+})
+
+export default connect(mapState)(index)

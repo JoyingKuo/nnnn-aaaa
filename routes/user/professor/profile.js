@@ -9,20 +9,21 @@ var getTeacherId = require('../course/getTeacherId');
 
 var TeacherId = getTeacherId.getTeacherId.teacherId;
 
+
 router.get('/professors/profile', TeacherId, function(req, res){
 
     if(req.session.profile){
         
 	var personStatus = JSON.parse(req.session.profile).personStatus;
 	//if(personStatus == 'a'){
-	//	ar teacherId = utils.getPersonId(JSON.parse(req.session.profile));
+		//var teacherId = utils.getPersonId(JSON.parse(req.session.profile));
         var teacherId = res.locals.teacherId;
         	if(!teacherId){
               		//console.log("No Student Id");
               		return;
         	}
             //test ID T9229
-        	query.findPerson(teacherId, function(err,result){
+        	query.ShowUserInfo(teacherId, function(err,result){
             		if(err){
                 		//console.log("Can't find student");
                 		throw err;

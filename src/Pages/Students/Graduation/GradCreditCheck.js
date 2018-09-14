@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import axios from 'axios'
 import scrollToComponent from 'react-scroll-to-component'
 import { ToastContainer, toast } from 'react-toastify';
-import Snow from 'react-snow-effect'
 import IconButton from 'material-ui/IconButton';
 import ActionGrade from 'material-ui/svg-icons/image/assistant';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
@@ -15,7 +14,6 @@ import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 
 import 'animate.css'
-import './Graduation.css'
 import App from './Trello/List'
 import DialogWaring from './Trello/warning'
 import ScrollToTopBtn from '../../../Components/ScrollToTopBtn';
@@ -429,7 +427,6 @@ class GradCreditCheck extends React.Component {
                                             <b>重複修課</b>：將只顯示一次,取成績最高的那次<br/>
                                             <br/><b>必修：</b>若有多修物理,化學或生物,會將多修的課程優先放至專業選修,若專業選修學分已滿,則放至其他選修。<br/>
                                             <br/><b>物理學分放置規則：</b>於必修項目會算為3學分,多的1學分將優先放至專業選修,若專業選修已滿,則會放至其他選修,物理也會顯示在該項項目中。<br/>
-                                            <br/><b>核心課程/副核心及他組合心課程：</b>若該項總學分已達畢業標準,會將多修的課程優先放至專業選修,若專業選修學分已滿,則放至其他選修。<br/>
                                             <br/><b>專業選修/外語/通識：</b>若該項總學分已達畢業標準,會將多修的課程放至其他選修。<br/></div>}
                                 </div>
                             </Popover>
@@ -454,6 +451,8 @@ class GradCreditCheck extends React.Component {
 }
 
 export default GradCreditCheck
+
+
 
 // <RaisedButton style={styles.button}
 // labelStyle={styles.labelStyle}

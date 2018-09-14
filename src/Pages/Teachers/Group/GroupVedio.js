@@ -14,25 +14,18 @@ import Vedios from './Vedio.json'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 
 const styles = {
-  noticeTitle: {
-    fontSize: '2.8em',
-    fontWeight: '500',
-    color: '#bf6468',
-    margin: '32px 0 0 50px',
-    float: 'left'
-  },
   mainTitle: {
     fontSize: '2.8em',
     fontWeight: '500',
-    color: '#c87137',
-    margin: '32px 0 0 50px',
+    color: '#6e8086',
+    margin: '32px 0 0 70px',
     float: 'left'
   },
   subTitle: {
     fontSize: '1.2em',
     fontWeight: '4300',
-    color: '#737373',
-    margin: '55px 0 0 50px',
+    color: '#bfbfbf',
+    margin: '55px 0 0 70px',
     float: 'left'
   },
   groups: {
@@ -110,12 +103,9 @@ const styles = {
 
 class GroupVedio extends React.Component {
   componentWillMount () {
-    console.log(Vedios)
+    // console.log(Vedios)
   }
   render () {
-    Vedios.map((item, i) => (
-      console.log(item)
-    ))
     return (
       <Grid style={{minHeight: 500}}>
         <Row>

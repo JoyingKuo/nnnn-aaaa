@@ -325,6 +325,29 @@ CScourse.processCS = function(req, res, next){
                                   courseResult[0].course.push(more[0]);  
                                  }  
                              }     
+                             else if(more[0].cn == '數位電路實驗'){
+                                if(temp > 3 && credit > 2){
+                                    var cosAdd = JSON.stringify(more[0]);
+                                    cosAdd = JSON.parse(cosAdd);
+                                    cosAdd.realCredit = 1;  
+                                    cosAdd.code = more[0].code + '_one';
+                                    more[0].realCredit = 2;
+                                    if(courseResult[3].credit < courseResult[3].require) {
+                                        courseResult[3].credit += cosAdd.realCredit;
+                                        courseResult[3].course.push(cosAdd);
+                                    }
+                                    else{
+                                        courseResult[4].credit += cosAdd.realCredit;
+                                        courseResult[4].course.push(cosAdd);
+                                    }
+                                    courseResult[0].credit += more[0].realCredit;
+                                    courseResult[0].course.push(more[0]);
+                                } 
+                                else{
+                                  courseResult[0].credit += credit;
+                                  courseResult[0].course.push(more[0]);  
+                                 }  
+                             } 
                              else{                                     
                                  courseResult[0].credit += credit;                             
 							     courseResult[0].course.push(more[0]);
@@ -357,6 +380,30 @@ CScourse.processCS = function(req, res, next){
                                                         }
                             if(more[index].cn =='微處理機系統實驗'){
                                 if(temp > 3){
+                                    var cosAdd = JSON.stringify(more[index]);
+                                    cosAdd = JSON.parse(cosAdd);
+                                    cosAdd.realCredit = 1;
+                                    cosAdd.code = more[index].code + '_one';
+                                    more[index].realCredit = 2;
+                                    if(courseResult[3].credit < courseResult[3].require){
+                                        courseResult[3].credit += cosAdd.realCredit;
+                                        courseResult[3].course.push(cosAdd);
+                                    }
+                                    else{
+                                        courseResult[4].credit += cosAdd.realCredit;
+                                        courseResult[4].course.push(cosAdd);
+                                    }
+                                    courseResult[0].credit += more[index].realCredit;
+                                    courseResult[0].course.push(more[index]);
+                                }
+                                else{
+                                    courseResult[0].credit += credit;
+                                    courseResult[0].course.push(more[index]);
+                                }
+                             }
+
+                             else if(more[index].cn =='數位電路實驗'){
+                                if(temp > 3 && credit > 2){
                                     var cosAdd = JSON.stringify(more[index]);
                                     cosAdd = JSON.parse(cosAdd);
                                     cosAdd.realCredit = 1;

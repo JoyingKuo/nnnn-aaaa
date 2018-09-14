@@ -9,6 +9,10 @@ var router = express.Router();
 var csrf = require('csurf');
 var csrfProtection = csrf();
 
+var getStudentId = require('../../course/getStudentId');
+
+
+var StudentId = getStudentId.getStudentId.studentId;
 router.post('/students/graduate/check', csrfProtection, function(req, res){
     var submit = req.body.check.state;
 
@@ -17,10 +21,10 @@ router.post('/students/graduate/check', csrfProtection, function(req, res){
     }
 });
 
-router.get('/students/graduate/check',function(req, res){
+router.get('/students/graduate/check',StudentId,function(req, res){
     let personId = res.locals.studentId;
     //console.log(personId);
-    query.findPerson(personId, function(err, result){
+    query.ShowUserInfo(personId, function(err, result){
         if(err){
             ////console.log(err);
             res.redirect('/');
