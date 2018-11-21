@@ -9,7 +9,7 @@ var table = {};
 function queryProfile(studentId, callback){
     query.ShowUserInfo(studentId, function(err, profile){
         if(!profile){
-            console.log("Can't find the student");
+            //console.log("Can't find the student");
             return;
         }
         if(err){
@@ -55,26 +55,14 @@ function queryRule(studentId, callback){
 
 }
 
-function queryCourse(studentId, callback){
+function queryCourse(studentId,professional_field, callback){
     var info = {
             group: '',
             program: '',
+            professional_field: professional_field,
+            studentId: studentId
     };
-	query.ShowUserInfo(studentId, function(err,result){
-		if(err){
-		//	console.log("Can't find student");
-			throw err;
-			return;
-		}
-		if(!result){
-		//	console.log("no result");
-            return;
-        }
-        //console.log("result:");
-		result = JSON.parse(result);
-        //console.log(result);
-		info.program = result[0].program;
-	        query.ShowCosGroup(studentId, function(err, result){
+    query.ShowCosGroup(studentId, function(err, result){
 			if(!result){
 				////console.log("Cannot find the student.");
 				return;
@@ -83,29 +71,55 @@ function queryCourse(studentId, callback){
 				throw err;
 				return;
 			}
-                	else{
-                       // console.log(result);
-                    		info.group = result;
-                    		////console.log("tablequerycourseelse");
-	           	 	processCourse(info, function(course){		
-                        		callback(course);
+            else{
+            	info.group = result;
+                let s_info = {id: studentId, graduate_submit:4,submit_type:2, net_media:professional_field};
+                query.SetGraduateSubmitStatus(s_info,function(err,result){
+                    if(err){
+                        throw err
+                        return;
+                    }
+                    if(!result)
+                        return;
+                    else{
+                        query.ShowUserInfo(studentId, function(err,result){
+		                    if(err){
+				                throw err;
+		            	        return;
+		                    }
+		                    if(!result){
+		                        return;
+                            }
+        		            result = JSON.parse(result);
+
+		                    info.program = result[0].program;
+                            info.professional_field = parseInt(result[0].net_media);
+                            processCourse(info, function(course){		
+                        	    callback(course);
                     		});
-			}
+
+	                    });
+                        
+                    }   
                 });
-	});
+            }
+        });
+	
 }
 
 function processCourse(info, callback){
          
 	var program = info.program.substring(0,2);
-        var result = info.group;
+    var result = info.group;
 	var course = {
+                program : program,
+                professional_field: info.professional_field,
                 compulse: [],
                 core: [],
                 vice:[],
                 others: [],
                 elective:[],
-		total:[]
+		        total:[]
         }
 	result = JSON.parse(result);
 	course.total = result;
@@ -151,24 +165,30 @@ function processCourse(info, callback){
                 callback(course);
 	}
 	else if(program == '網多'){
+       
 		for(var i = 0; i < result.length; i++){
 		
 			switch(result[i].type){
-				case '必修' :
-					course.compulse.push(result[i]);
+                case '必修' : 					
+                    course.compulse.push(result[i]);
 					break;
 				case '核心' :
 					course.core.push(result[i]);
 					break;
-					case '副核心' :
-						course.vice.push(result[i]);
-						break;
-					case '資電核心': case '資工核心' :
-						course.others.push(result[i]);
-						break;
-			}	
-		
-		}      
+				case '副核心' :
+					course.vice.push(result[i]);
+					break;
+				case '資電核心': case '資工核心' :
+					course.others.push(result[i]);
+					break;
+
+			}
+    
+            if(result[i].type == '網路' && info.professional_field == 0)
+                course.compulse.push(result[i]);
+            else if(result[i].type == '多媒體' && info.professional_field == 1)
+                course.compulse.push(result[i]);
+        }      
                 callback(course);
 	}
 
@@ -177,7 +197,7 @@ function processCourse(info, callback){
 function queryList(studentId, callback){
 	query.ShowGraduateStudentList(studentId, function(err, list){
                 if(!list){
-                        console.log("Can't find the student.");
+                        //console.log("Can't find the student.");
                         return;
                 }
                 if(err){
@@ -219,9 +239,9 @@ function queryNow(studentId, callback){
 	});
 }
 
-function queryGeneral(callback){
+function queryGeneral(studentId, callback){
 	//*general cos rule*/
-	query.ShowCosMotionLocate('0416004', function(err, general){
+	query.ShowCosMotionLocate(studentId, function(err, general){
 		if(!general){
 			return;
 		}
@@ -260,7 +280,7 @@ function queryProject(studentId, callback){
         }
         else{
 			project = JSON.parse(project);
-			console.log(project);
+			//console.log(project);
 			callback(project);
 		}
             
@@ -446,7 +466,7 @@ function SetProjectScore(info ,callback){
 function SetProjectTitle(info ,callback){
     var content = {research_title : info.research_title, tname : info.tname, first_second : info.first_second, semester:info.year, new_title : info.new_title};
 	var num = query.SetResearchTitle(content);
-	console.log(content);	
+	//console.log(content);	
 	setTimeout(function(){
 		var signal = {signal :1};
 		callback(signal);
@@ -524,7 +544,7 @@ function queryProjectApplyList(teacherId ,callback){
 function queryProjectList(info, callback){
     var teacherId = info.teacherId;
     var sem = info.sem;
-	query.ShowTeacherResearchStudent(teacherId, function(err, result){
+	query.ShowGradeTeacherResearchStudent(teacherId,'', function(err, result){
             if(err){
                 throw err;
                 return;
@@ -791,8 +811,8 @@ table.getPass = function(studentId, callback){
 	callback(pass);
     });
 }
-table.getCourse = function(studentId, callback){
-    queryCourse(studentId, function(course){
+table.getCourse = function(studentId, professional_field, callback){
+    queryCourse(studentId,professional_field, function(course){
 	callback(course);
     });
 }
@@ -816,8 +836,8 @@ table.getNow = function(studentId, callback){
         callback(now);
     });
 }
-table.getGeneral = function(callback){
-    queryGeneral(function(general){
+table.getGeneral = function(studentId, callback){
+    queryGeneral(studentId, function(general){
         callback(general);
     });
 }

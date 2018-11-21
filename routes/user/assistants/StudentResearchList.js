@@ -58,7 +58,7 @@ router.post('/assistants/project/StudentResearchList',csrfProtection, function(r
 			
 							if(research.length!=0){
 								var id = index[research[research.length -1].student_id];
-								if(research[research.length - 1].first_second == 1)
+								if(research[research.length - 1].add_status == 0)
 									project[id].project.status = 0;
 								else
 									project[id].project.status = 1;

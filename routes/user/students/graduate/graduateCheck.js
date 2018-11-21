@@ -13,11 +13,34 @@ var getStudentId = require('../../course/getStudentId');
 
 
 var StudentId = getStudentId.getStudentId.studentId;
-router.post('/students/graduate/check', csrfProtection, function(req, res){
-    var submit = req.body.check.state;
+router.post('/students/graduate/check', csrfProtection, StudentId, function(req, res){
 
-    if(req.session.profile && submit){
-        utils.getPersonIdwCb(JSON.parse(req.session.profile), setSubmitState);
+    if(req.session.profile){
+        let personId = res.locals.studentId;
+        let submitType = req.body.general_course.type;
+        let net_media = req.body.professional_field;
+        let info = {id: personId, graduate_submit:1,submit_type:submitType, net_media:net_media};
+        query.SetGraduateSubmitStatus(info,function(err,result){
+             if(err){
+            ////console.log(err);
+            res.redirect('/');
+            }
+            else {
+                 var checkState = { 
+                    check:{
+                        state: 1
+                    },
+                    general_course:{
+                        type: parseInt(submitType)
+                    }
+                }
+                res.send(checkState);
+
+            }
+        });
+    }
+    else{
+        res.redirect('/')
     }
 });
 
@@ -30,17 +53,23 @@ router.get('/students/graduate/check',StudentId,function(req, res){
             res.redirect('/');
         }
         else {
-            if(JSON.parse(result)[0].graduate_submit === "1")
-                res.send({ check: {state: true } });
-            else
-                res.send({ check: {state: false } });
+            result = JSON.parse(result);
+
+            var checkState = { 
+                check:{
+                    state: (result[0].graduate_submit == null)?0:parseInt(result[0].graduate_submit)
+                },
+                general_course:{
+                    type: (result[0].submit_type == null)?null:parseInt(result[0].submit_type)
+
+                },
+                professional_field: (result[0].net_media == null)?0:parseInt(result[0].net_media)
+            }
+            res.send(checkState)
         }
     });
 });
 
-var setSubmitState = function(studentId){
-  query.setStudentGraduateSubmit(studentId, '1');
-}
 
 module.exports = router;
 

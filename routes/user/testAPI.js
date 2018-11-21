@@ -7,28 +7,30 @@ var query = require('../../db/msql');
 //var TeacherId = getTeacherId.getTeacherId.teacherId;
 router.get('/testAPI', function(req, res){
 
-        if(req.session.profile){
+        //if(req.session.profile){
                 
-                        //var teacherId = res.locals.teacherId;
-                                
-          query.ShowStudentResearchInfo('0316003', function(err, result){
-                                                        if(err){
-                                                                            throw err;
-                                                                                            res.redirect('/');
-                                                                                                        }
-                                                                                                                    if(!result)
-                                                                                                                                        res.redirect('/');
-                                                                                                                                                    else{
-                                                                                                                                                                        result = JSON.parse(result);
-                                                                                                                                                                                        console.log(result);
-                                                                                                                                                                                                        res.send(result);
-                                                                                                                                                                                                                    }
-                                                                                                                                                                                                                            });
-                                            }
-                                                else
-                                                            res.redirect('/');
-
+            //var teacherId = res.locals.teacherId;
+            var data1 = {student_id: '0416208'};
+            var data2 = {all_student: true};
+            //console.log(data1);
+            var info = {id:'0416208',graduate_submit:0,submit_type:3, net_media:0}
+            
+            query.SetGraduateSubmitStatus(info, function(err,result){
+                if(err){
+                    throw err;
+                    res.redirect('/');
+                }
+                if(!result)
+                    res.redirect('/');
+                else{
+                    result = JSON.parse(result);
+                    // console.log(result);
+                    res.send(result); 
+                }
+            });                         
+        //}
+        //else
+          //  res.redirect('/');
 });
 
 module.exports = router;
-

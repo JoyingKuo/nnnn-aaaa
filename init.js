@@ -41,13 +41,19 @@ module.exports.init = function(){
 //  app.use('/assistants/head/s/:sid', express.static('./public', { index: 'index.assistant.html'}));
   app.use('/', express.static('./public', {index: 'index.html'}));
   app.use('/students/head', express.static('./public', {index: 'index.html'}));
+  app.use('/students/grad', express.static('./public', {index: 'index.html'}));
+  app.use('/students/map', express.static('./public', {index: 'index.html'}));
+  app.use('/students/professor', express.static('./public', {index: 'index.html'}));
+  app.use('/students/project', express.static('./public', {index: 'index.html'}));
+
   app.use('/teachers/head', express.static('./public', {index: 'index.html'}));
   app.use('/assistants/head', express.static('./public', {index: 'index.html'}));
   app.use('/assistants/grad', express.static('./public', {index: 'index.html'}));
   app.use('/assistants/project', express.static('./public', {index: 'index.html'}));
   app.use('/assistants/family', express.static('./public', {index: 'index.html'}));
   app.use('/assistants/family/:tid', express.static('./public', {index: 'index.html'}));
-  app.use('/assistants/head/s/:sid', express.static('./public', { index: 'index.html'}));
+  app.use('/assistants/head/s/:sid/:sname/:sgroup', express.static('./public', { index: 'index.html'}));
+  app.use('/assistants/verify', express.static('./public', {index: 'index.html'}));
 
   app.use(require('./routes/user/students/profile'));
   app.use(require('./routes/user/students/courseMap'));
@@ -116,5 +122,19 @@ module.exports.init = function(){
   app.use(require('./routes/user/mail/inbox'));
  // app.use(require('./routes/user/students/mapPass'));
   app.use(require('./routes/user/professor/students/StudentInfo'));
+    app.use(require('./routes/user/assistants/SetAddStatus'));
+  app.use(require('./routes/user/testAPI.js'));
+  app.use(require('./routes/user/students/createOffsetApplyForm.js')); 
+  app.use(require('./routes/user/assistants/ShowUserOffsetApplyForm.js'));
+  app.use(require('./routes/user/assistants/AddToOffset.js'));
+  app.use(require('./routes/user/assistants/SetOffsetApplyFormAgreeStatus.js'));
+  app.use(require('./routes/user/assistants/graduate/graduateList'));
+  app.use(require('./routes/user/assistants/graduate/gradeStudent'));
+  app.use(require('./routes/user/assistants/graduate/graduateStudent'));
+  app.use(require('./routes/user/assistants/graduate/graduateListDownload'));
+  app.use(require('./routes/user/students/graduate/graduateChange/graduateChange'));
+  app.use(require('./routes/user/students/graduate/graduateChange/switchCourse.js'));
+ app.use(require('./routes/user/students/graduate/graduateMoveReset.js'));
+ app.use(require('./routes/user/students/graduate/graduateChange/graduateList'));
   return app;
 };

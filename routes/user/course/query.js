@@ -51,12 +51,15 @@ query.queryPass = function(req, res, next){
 query.queryCourse = function(req, res, next){
     if(req.session.profile && res.locals.studentId){
     	var studentId = res.locals.studentId;
-  		if(!studentId){
+        if(!studentId){
   			//console.log("No Student Id in queryCourse");
   			return;
   	  	}
       		else{
-        		table.tables.getCourse(studentId, function(course){
+                var professional_field = res.locals.professional_field;
+                
+
+        		table.tables.getCourse(studentId, professional_field, function(course){
           			req.course = course;
 	  			if(req.course)
             				next();
@@ -146,7 +149,8 @@ query.queryNow = function(req, res, next){
 //query courses that could be taken as general courses
 query.queryGeneral = function(req, res, next){
     if(req.session.profile){
-    	table.tables.getGeneral(function(general){
+        var studentId = res.locals.studentId;
+    	table.tables.getGeneral(studentId, function(general){
         	req.general = general;
                 if(req.general)
                 	next();

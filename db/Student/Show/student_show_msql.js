@@ -17,6 +17,23 @@ function parseEng(cos){
     return cos;
 }
 
+function parseOffsetCos(cos){
+    // parse cos_cname blank and parentheses
+    if(cos.indexOf('（') > -1){
+        let index = cos.indexOf('（')
+        cos = cos.substring(0, index) + '(' + cos.substring(index+1);
+    }
+    if(cos.indexOf('）') > -1){
+        let index = cos.indexOf('）')
+        cos = cos.substring(0, index) + ')' + cos.substring(index+1);
+    }
+    while(cos.indexOf(' ') != -1){
+        let index = cos.indexOf(' ')
+        cos = cos.substring(0, index) + cos.substring(index+1);
+    }
+    return cos;
+}
+
 module.exports = {
 	ShowUserInfo: function(id, callback) {
         if (id.match(/^[0-9].*/g)) {
@@ -31,6 +48,7 @@ module.exports = {
                         pool.release(c);
                         return;
                     }
+                    console.log(result.length)
                     if(result.length)
                     {
                         result[0]['status'] = 'c';
@@ -104,23 +122,6 @@ module.exports = {
             })
         }
     }, 
-    // Old version
-    // ShowUserAllScore: function(id, callback) {
-    //     const resource = pool.acquire();
-    //     resource.then(function(c) {
-    //         var sql_ShowUserAllScore = c.prepare(s.ShowUserAllScore);
-    //         var year = '1' + id[0] + id[1];
-    //         c.query(sql_ShowUserAllScore({ id: id, year: year }), function(err, result) {
-    //             if (err){
-    //                 callback(err, undefined);
-    //                 pool.release(c);
-    //                 return;
-    //             }
-    //             callback(null, JSON.stringify(result));
-    //             pool.release(c);
-    //         })
-    //     })
-    // },
     ShowUserAllScore: function(id, callback) {
         const resource = pool.acquire();
         resource.then(function(c) {
@@ -273,18 +274,33 @@ module.exports = {
     },
     ShowUserOnCos: function(id, callback) {
         const resource = pool.acquire();
-        resource.then(function(c){
-            var sql_ShowUserOnCos = c.prepare(s.ShowUserOnCos);
-            c.query(sql_ShowUserOnCos({ id: id }), function(err, result) {
-                if (err){
-                    callback(err, undefined);
+        console.log(id);
+        if(id == 'all')
+            resource.then(function(c){
+                var sql_ShowUserOnCos_all = c.prepare(s.ShowUserOnCos_all);
+                c.query(sql_ShowUserOnCos_all({}), function(err, result) {
+                    if (err){
+                        callback(err, undefined);
+                        pool.release(c);
+                        return;
+                    }
+                    callback(null, JSON.stringify(result));
                     pool.release(c);
-                    return;
-                }
-                callback(null, JSON.stringify(result));
-                pool.release(c);
+                });
             });
-        });
+        else
+            resource.then(function(c){
+                var sql_ShowUserOnCos_single = c.prepare(s.ShowUserOnCos_single);
+                c.query(sql_ShowUserOnCos_single({ id: id }), function(err, result) {
+                    if (err){
+                        callback(err, undefined);
+                        pool.release(c);
+                        return;
+                    }
+                    callback(null, JSON.stringify(result));
+                    pool.release(c);
+                });
+            });
     },
     ShowUserOffset: function(id, callback) {
         const resource = pool.acquire();
@@ -297,6 +313,10 @@ module.exports = {
                         pool.release(c);
                         return;
                     }
+                    for(let i in result){
+                        if(typeof(result[i]['cos_cname'])==='string')
+                            result[i]['cos_cname'] = parseOffsetCos(result[i]['cos_cname']);
+                    }
                     callback(null, JSON.stringify(result));
                     pool.release(c);
                 });
@@ -307,6 +327,10 @@ module.exports = {
                         callback(err, undefined);
                         pool.release(c);
                         return;
+                    }
+                    for(let i in result){
+                        if(typeof(result[i]['cos_cname'])==='string')
+                            result[i]['cos_cname'] = parseOffsetCos(result[i]['cos_cname']);
                     }
                     callback(null, JSON.stringify(result));
                     pool.release(c);
@@ -398,23 +422,63 @@ module.exports = {
             var sql_ShowSemesterScore = c.prepare(s.ShowSemesterScore);
             c.query(sql_ShowSemesterScore({id}), function(err, result) {
                 c.query(sql_ShowCosScore({id}), function(err, cos){
-                
-                result = JSON.parse(JSON.stringify(result));
-                cos = JSON.parse(JSON.stringify(cos));
-                var score = JSON.parse(JSON.stringify(cos,["cn","en","score","pass"]));
+                    result = JSON.parse(JSON.stringify(result));
+                    cos = JSON.parse(JSON.stringify(cos));
+                    var score = JSON.parse(JSON.stringify(cos,["cn","en","score","pass"]));
 
-                for(let sem_num = 0;sem_num<result.length;sem_num++){
-                    result[sem_num]["score"]=[];
-                    for(let cos_num = 0;cos_num<cos.length;cos_num++){
-                        if(result[sem_num].semester===cos[cos_num].semester){
-                            result[sem_num]["score"].push(score[cos_num]);
+                    for(let sem_num = 0;sem_num<result.length;sem_num++){
+                        result[sem_num]["score"]=[];
+                        for(let cos_num = 0;cos_num<cos.length;cos_num++){
+                            if(result[sem_num].semester===cos[cos_num].semester){
+                                result[sem_num]["score"].push(score[cos_num]);
+                            }
                         }
                     }
+                    callback(null, JSON.stringify(result));
+                    pool.release(c);
+                })
+            })
+        })
+    },
+    ShowUserOffsetApplyForm: function(data, callback){
+        const resource = pool.acquire();
+        resource.then(function(c){
+            var sql_ShowUserOffsetApplyFormSingle = c.prepare(s.ShowUserOffsetApplyFormSingle);
+            var sql_ShowUserOffsetApplyFormAll = c.prepare(s.ShowUserOffsetApplyFormAll);
+            if(data['student_id'])
+                c.query(sql_ShowUserOffsetApplyFormSingle(data),function(err,result){
+                    if(err){
+                        callback(err, undefined);
+                        pool.release(c);
+                        return;
+                    }
+                    callback(null, JSON.stringify(result));
+                });
+            else if(data['all_student'])
+                c.query(sql_ShowUserOffsetApplyFormAll([]),function(err,result){
+                    if(err){
+                        callback(err, undefined);
+                        pool.release(c);
+                        return;
+                    }
+                    callback(null, JSON.stringify(result));
+                });
+        });
+    },
+    ShowGivenGradeStudent: function(data, callback){
+        const resource=pool.acquire();
+        resource.then(function(c) {
+            var sql_ShowGivenGradeStudent = c.prepare(s.ShowGivenGradeStudent);
+            c.query(sql_ShowGivenGradeStudent(data), function(err, result){
+                if(err)
+                {
+                    callback(err, undefined);
+                    pool.release(c);
+                    return ;
                 }
                 callback(null, JSON.stringify(result));
                 pool.release(c);
-                })
-            })
+            });
         })
     }
 }

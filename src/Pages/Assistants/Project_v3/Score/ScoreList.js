@@ -9,28 +9,28 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 const styles = theme => ({
 
 })
-const PROJECT_STATUS = ['已申請專題', '專題審核中', '未申請專題']
-const PROJECT_STATUS_COLOR = ['green', 'orange', 'red']
+// const PROJECT_STATUS = ['已申請專題', '專題審核中', '未申請專題']
+// const PROJECT_STATUS_COLOR = ['green', 'orange', 'red']
 
 class ScoreList extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = {
-      expanded: null
+      panel_open: [...Array(10)].map( val => true)
     }
   }
 
   render() {
 
-    const { scores, classes } = this.props
-    const { expanded } = this.state
+    const { scores } = this.props
+    const { panel_open } = this.state
 
     return (
       scores.map( ( score, index ) => {
         return (
           <div style = {{ margin: '5px auto', fontFamily: 'Noto Sans CJK TC' }}>
-            <ExpansionPanel expanded = { expanded === index } onChange = { () => this.setState({ expanded: expanded === index ? null : index }) } >
+            <ExpansionPanel expanded = { panel_open[index] } onChange = { () => this.setState({ panel_open: panel_open.map( (val, i) => i === index ? !val : val) }) } >
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                 <div style = {{ width: '100%', display: 'flex' }}>
                   <div style = {{ fontSize: 20, flex: 0.2, textAlign: 'center', color: 'black' }} >{ score.student.id }</div>

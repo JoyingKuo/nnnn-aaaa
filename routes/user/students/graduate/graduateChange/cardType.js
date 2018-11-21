@@ -1,16 +1,45 @@
 var query = require('../../../../../db/msql');
 var cardsets = {};
+//var getStudentId = require('../../course/getStudentId');
+//var StudentId = getStudentId.getStudentId.studentId;
 
 
 // Define the properties that all cards have
-cardsets.Card = function(code){
-
+cardsets.Card = function(code, name, type, sId){   // Other
     this.code = code; // Eg: DAC1311
-
+    this.name = name;
+    this.type = type;
+    this.sId = sId;
 }
 
 cardsets.Card.prototype.check = function(callback){
-    callback(true); // can move if have not defined
+    let checkCode = this.code.substring(0,3);
+    let checkFullCode = this.code.substring(0,7);
+    let checkOneCode = this.code;
+    let checkName = this.name;
+    let checkType = this.type;
+    let studentId = this.sId;
+    query.ShowCosGroup(studentId, function(err, result){
+        let table = JSON.parse(result);
+        for(let i = 0; i < table.length; i++){
+            for(let j = 0; j < table[i].cos_codes.length; j++){
+                if(table[i].cos_codes[j]+"_one" === checkOneCode){
+                    callback('其他選修');
+                    return;
+                }
+                if(table[i].cos_codes[j] === checkFullCode && table[i].type == "必修"){
+                    callback('');
+                    return;
+                }
+            }
+        }
+        if(checkType === "軍訓" || checkCode === "PYY" || checkName === "藝文賞析教育")  // Eng, Repeat
+            callback('');
+        else callback('其他選修'); // can move if have not defined
+    });
+    //else if(checkEnStatus == 0 || checkEnStatus == null){
+        //if(checkType == )
+    //}
 }
 
 // All targets will inherit Card and specific functions are defined to verify if it do belong to the group
@@ -30,19 +59,18 @@ cardsets.Compulsory.prototype.check = function(callback){
     let checkType = this.type;
     let studentId = this.sId;
     // check if the course code exist in the group table
-    query.Group(studentId, function(err, result){
-        let table = JSON.parse(result);    
+    query.ShowCosGroup(studentId, function(err, result){
+        let table = JSON.parse(result);
         for(let i = 0; i < table.length && checkType === "必修" ; i++){
             for(let j = 0; j < table[i].cos_codes.length; j++){
                 if(table[i].cos_codes[j] === checkCode){
-                    callback(true);
+                    callback('共同必修');
                     return;
                 }
             }
         }
-        callback(false);
+        callback('');
     });
-
 }
 
 cardsets.Core = function(code, type, sId){
@@ -61,10 +89,10 @@ cardsets.Core.prototype.check = function(callback){
     let studentId = this.sId;
     // check if the course code exist in the group table
     // group's
-    query.Group(studentId, function(err, result){
+    query.ShowCosGroup(studentId, function(err, result){
         //console.log(studentId);
         //console.log(checkType);
-        let table = JSON.parse(result);    
+        let table = JSON.parse(result);
         for(let i = 0; i < table.length && checkType === "選修" ; i++){
             //console.log(i + ": " + table[i].type);
             for(let j = 0; j < table[i].cos_codes.length && table[i].type === "核心"; j++){
@@ -95,7 +123,7 @@ cardsets.SecondaryCore.prototype.check = function(callback){
     let studentId = this.sId;
     // check if the course code exist in the group table
     // other group's core or secondary core -> not core and compulsory
-    query.Group(studentId, function(err, result){
+    query.ShowCosGroup(studentId, function(err, result){
         let table = JSON.parse(result);    
         for(let i = 0; i < table.length && checkType === "選修" ; i++){
             for(let j = 0; j < table[i].cos_codes.length && (table[i].type !== "必修" && table[i].type !== "核心"); j++){
@@ -110,10 +138,12 @@ cardsets.SecondaryCore.prototype.check = function(callback){
 
 }
 
-cardsets.Elective = function(code, name){
+cardsets.Elective = function(code, name, type, sId){
     
     this.code = code; // Eg: DAC1311
-    this.name = name; // Eg: 導師時間 
+    this.name = name; // Eg: 導師時間
+    this.type = type;
+    this.sId = sId;
     
 };
 
@@ -121,33 +151,50 @@ cardsets.Elective.prototype = new cardsets.Card();
 
 cardsets.Elective.prototype.check = function(callback){
     let checkCode = this.code.substring(0, 3);
-    let checkFullCode = this.code;
+    let checkFullCode = this.code.substring(0,7);
+    let checkOneCode = this.code;
     let checkName = this.name;
+    let checkType = this.type;
+    let studentId = this.sId;
     // check if course code matches department
-    if(checkCode === "DCP" || checkCode === "IOC" || checkCode === "IOE" || checkCode === "ILE"){
-        if(checkName === "服務學習(一)" || checkName === "服務學習(二)" || checkName === "導師時間")
-            callback(false); // these courses although held by CS cannot be placed in elective course
-        else
-            callback(true);
-    }
-    else{
-        // check if physic chemistry biology
-        query.Group("0316201", function(err, result){
-            let table = JSON.parse(result);
-            for(let i = 0; i < table.length; i++){
-                if(table[i].cos_cname.substring(0, 6) === "物化生三選一"){
-                    for(let j = 0; j < table[i].cos_codes.length; j++){
-                        if(table[i].cos_codes[j] === checkFullCode){
-                            callback(true);
-                            return;
+    query.ShowCosGroup(studentId, function(err, result){
+        let table = JSON.parse(result);
+        for(let i = 0; i < table.length; i++){
+            for(let j = 0; j < table[i].cos_codes.length; j++){
+                if(table[i].cos_codes[j]+"_one" === checkOneCode){
+                    callback('專業選修');
+                    return;
+                }
+                if(table[i].cos_codes[j] === checkFullCode && table[i].type === "必修"){
+                    callback('');
+                    return;
+                }
+            }
+        }
+        if(checkCode === "DCP" || checkCode === "IOC" || checkCode === "IOE" || checkCode === "ILE" || checkCode === "IDS"){
+            if(checkName === "服務學習(一)" || checkName === "服務學習(二)" || checkName === "導師時間" || checkName === "教學實務" || checkName === "個別研究")
+                callback(''); // these courses although held by CS cannot be placed in elective course
+            else
+                callback('專業選修');
+        }
+        else{
+            // check if physic chemistry biology
+            query.ShowCosGroup(studentId, function(err, result){     // studentId??
+                let table = JSON.parse(result);
+                for(let i = 0; i < table.length; i++){
+                    if(table[i].cos_cname.substring(0, 6) === "物化生三選一"){
+                        for(let j = 0; j < table[i].cos_codes.length; j++){
+                            if(table[i].cos_codes[j] === checkFullCode){
+                                callback('專業選修');
+                                return;
+                            }
                         }
                     }
                 }
-            }
-            callback(false);
-        });
-    }
-
+                callback('');
+            });
+        }
+    });
 }
 
 cardsets.Language = function(type){
@@ -161,9 +208,9 @@ cardsets.Language.prototype = new cardsets.Card();
 cardsets.Language.prototype.check = function(callback){
     let checkType = this.type;
     if(checkType === "外語")
-        callback(true);
+        callback('外語');
     else
-        callback(false);
+        callback('');
 
 
 }
@@ -178,10 +225,10 @@ cardsets.General = function(code, type){
 cardsets.General.prototype = new cardsets.Card();
 
 cardsets.General.prototype.check = function(callback){
-    let checkType = this.type;
+    let checkType = this.type.substring(0,2);
     let checkCode = this.code;
     if(checkType === "通識")
-        callback(true);
+        callback('通識');
     else{
     // some classes can be admit as general course
         /*query.general_cos_rule(function(err, result){
@@ -195,7 +242,7 @@ cardsets.General.prototype.check = function(callback){
             }            
             callback(false);
        });*/
-            callback(false);
+            callback('');
     }
 
 }
@@ -211,9 +258,9 @@ cardsets.PE.prototype = new cardsets.Card();
 cardsets.PE.prototype.check = function(callback){
     let checkCode = this.code.substring(0,3);
     if(checkCode === "PYY")
-        callback(true);
+        callback('體育');
     else
-        callback(false);
+        callback('');
 
 }
 
@@ -228,9 +275,9 @@ cardsets.Serve.prototype = new cardsets.Card();
 cardsets.Serve.prototype.check = function(callback){
     let checkType = this.type;
     if(checkType === "服務學習" || checkType === "通識服務學習" )
-        callback(true);
+        callback('服務學習');
     else
-        callback(false);
+        callback('');
 
 }
 
@@ -243,11 +290,25 @@ cardsets.Art = function(name){
 cardsets.Art.prototype = new cardsets.Card();
 
 cardsets.Art.prototype.check = function(callback){
-    let checkName = this.name
+    let checkName = this.name;
     if(checkName === "藝文賞析教育")
-        callback(true);
+        callback('藝文賞析');
     else
-        callback(false);
+        callback('');
 
 }
+
+cardsets.Graduate = function(code){
+    this.code = code;
+};
+
+cardsets.Graduate.prototype = new cardsets.Card();
+
+cardsets.Graduate.prototype.check = function(callback){
+    let checkCode = this.code.substring(0,3);
+    if(checkCode === "IOC" || checkCode === "IOE" || checkCode === "ILE" || checkCode === "IDS")
+        callback('抵免研究所課程');
+    else callback('');
+}
+
 exports.cardset = cardsets;

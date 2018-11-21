@@ -39,9 +39,25 @@ Othercourse.processOther = function(req, res, next){
                 course: []
         }
         var general = {
-                title: '通識',
+                title: '通識(舊制)',
                 credit: 0,
                 require: 20,
+                course: []
+        }
+        var general = {
+                title: '通識(新制)',
+                credit: {
+                    total: 0,
+                    core: 0,
+                    basic: 0,
+                    cross: 0,
+                },
+                require: {         
+                    total: 22,
+                    core: 6,
+                    basic: 6,
+                    cross: 6
+                },
                 course: []
         }
         var otherElect = {
@@ -242,6 +258,8 @@ Othercourse.processOther = function(req, res, next){
                 else if(cosInfo.dimension == '自然')
                     dimension[5] = true;
                 general.course.push(cosInfo);
+                //console.log(cosInfo);
+                //general_new.course.push(cosInfo);
                 general.credit += parseInt(offset[i].credit);
             }
             else if(offset[i].cos_type == '服務學習'){

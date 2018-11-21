@@ -2,7 +2,7 @@ exports.findStudent = "\
     select\
         s.student_id, s.sname, s.program, s.grade,\
         s.email, s.graduate, s.graduate_submit, s.gmail,\
-        s.fb_id, s.github_id,\
+        s.fb_id, s.github_id, s.submit_type, s.net_media,\
         if(e.pass_code=0,s.en_certificate,e.pass_code) as en_certificate\
     from student as s, en_certificate as e\
     where s.student_id = :id\
@@ -11,7 +11,7 @@ exports.findStudent = "\
     select\
         s.student_id, s.sname, s.program, s.grade,\
         s.email, s.graduate, s.graduate_submit, s.gmail,\
-        s.fb_id, s.github_id, NULL as en_certificate\
+        s.fb_id, s.github_id, NULL as en_certificate, s.submit_type, s.net_media\
     from student as s\
     where s.student_id = :id\
     and s.student_id not in\
@@ -144,21 +144,22 @@ exports.ShowUserAllScore = "\
         select a.student_id, a.program, a.cos_code, a.cos_year, a.semester, a.cos_cname, a.cos_ename, a.cos_type, a.score_type, a.pass_fail, a.score_level, a.score, a.unique_id, a.type, a.brief, a.brief_new, a.cos_credit, a.cos_typeext, tcr.tname\
         from \
         (\
-            select a.student_id, a.program, a.cos_code, a.cos_year, a.semester, a.cos_cname, a.cos_ename, a.cos_type, a.score_type, a.pass_fail, a.score_level, a.score, a.unique_id, a.type, d.brief, d.brief_new, d.cos_credit, d.teacher_id, d.cos_typeext\
+            select a.student_id, a.program, a.cos_code, a.cos_year, a.semester, a.cos_cname, a.cos_ename, a.cos_type, a.score_type, a.pass_fail, a.score_level, a.score, a.unique_id, a.type, d.brief, d.brief_new, a.cos_credit, d.teacher_id, d.cos_typeext\
             from \
             (\
-                select a.student_id, a.program, a.cos_code, a.cos_year, a.semester, a.cos_cname, a.cos_ename, a.cos_type, a.score_type, a.pass_fail, a.score_level, a.score, a.unique_id, t.type\
+                select a.student_id, a.program, a.cos_code, a.cos_credit, a.cos_year, a.semester, a.cos_cname, a.cos_ename, a.cos_type, a.score_type, a.pass_fail, a.score_level, a.score, a.unique_id, t.type\
                 from \
                 (\
-                    select std.student_id, std.program, sc.cos_code, sc.cos_year, sc.semester, sc.cos_cname, n.cos_ename, sc.cos_type, sc.score_type, sc.pass_fail, sc.score_level, sc.score, sc.unique_id\
+                    select std.student_id, std.program, sc.cos_code, sc.cos_credit, sc.cos_year, sc.semester, sc.cos_cname, n.cos_ename, sc.cos_type, sc.score_type, sc.pass_fail, sc.score_level, sc.score, sc.unique_id\
                     from \
                     (\
-                        select cos_code, cos_year, semester, cos_cname, cos_type, score_type, pass_fail, score_level, score,\
+                        select cos_code, cos_credit, cos_year, semester, cos_cname, cos_type, score_type, pass_fail, score_level, score,\
                                 case semester when '3' then concat(cos_year, '-', 'X', '-', cos_id) \
                                                 else concat(cos_year, '-', semester, '-', cos_id) \
                                 end as unique_id\
                         from cos_score\
                         where student_id = :id\
+                        and pass_fail='通過'\
                     ) as sc, student as std, cos_name as n\
                     where std.student_id = :id\
                     and n.unique_id = sc.unique_id\
@@ -176,9 +177,9 @@ exports.ShowUserAllScore = "\
     ) as a \
     left outer join\
     (\
-        select student_id, offset_type, cos_code_old, cos_cname_old, cos_code, cos_cname\
-        from offset\
-        where student_id = :id\
+        select o.student_id, o.offset_type, o.cos_code_old, o.cos_cname_old, o.cos_code, o.cos_cname \
+        from (select distinct * from offset where student_id = :id) as o \
+        where o.student_id = :id\
     ) as b\
     on a.student_id = b.student_id\
     and a.cos_code = b.cos_code_old\
@@ -296,7 +297,7 @@ exports.ShowStudentIdList = "\
     from student";
 
 exports.ShowGradeStudentIdList = "\
-    select student_id, sname, program,if((substring(program,1,1)='資' or substring(program,1,1)='網'),1,0) as status\
+    select student_id, sname, program,if(substring(program,1,2)='資工' or substring(program,1,2)='網多' or substring(program,1,2)='資電',1,0) as status\
     from student\
     where student_id like concat(:grade,'%')";
 
@@ -305,34 +306,26 @@ exports.ShowStudentMentor = "\
     from mentor_list\
     where student_id = :id";
 
-exports.ShowUserOnCos = "\
-    select\
-        s.student_id, cd.cos_code, cn.cos_cname, cn.cos_ename,\
-        cd.cos_type, cd.cos_typeext, cd.brief, cd.brief_new,\
-        cd.cos_credit\
-    from on_cos_data as o\
-    left outer join\
-    student as s\
-    on o.student_id = s.student_id\
-    left outer join\
-    cos_data as cd\
-    on cd.unique_id = concat(o.year, '-', o.semester, '-', o.code)\
-    left outer join\
-    cos_name as cn\
-    on cn.unique_id = cd.unique_id\
-    where s.student_id = :id";
+exports.ShowUserOnCos_single = "\
+    select  student_id, cos_code, cos_cname, cos_ename, cos_type, cos_typeext, brief, brief_new, cos_credit \
+    from on_cos_data where student_id = :id";
+
+exports.ShowUserOnCos_all = "\
+    select  student_id, cos_code, cos_cname, cos_ename, cos_type, cos_typeext, brief, brief_new, cos_credit \
+    from on_cos_data";
+
 
 exports.ShowUserOffsetSingle = "\
     select\
         os.student_id, os.apply_year, os.apply_semester, os.cos_code_old,\
         os.cos_cname_old, os.cos_code, os.cos_cname, os.credit,\
-        os.offset_type, os.brief, os.cos_type, cg.score\
+        os.offset_type, os.brief, os.brief_new, os.cos_type, cg.score\
     from offset as os\
     left outer join\
     (\
         select student_id, cos_cname, cos_code, score\
         from cos_score\
-        where student_id = :id and pass_fail = '通過'\
+        where student_id = :id and pass_fail = '通過' and cos_cname not like '%導師%'\
     ) as cg\
     on cg.student_id = os.student_id\
     and cg.cos_code = os.cos_code_old\
@@ -349,7 +342,7 @@ exports.ShowUserOffsetAll="\
     (\
         select student_id, cos_cname, cos_code, score\
         from cos_score\
-        where student_id = :id and pass_fail = '通過'\
+        where student_id = :id and pass_fail = '通過' and cos_cname not like '%導師%'\
     ) as cg\
     on cg.student_id = os.student_id\
     and cg.cos_code = os.cos_code_old\
@@ -436,11 +429,11 @@ exports.ShowSemesterScore = "\
     select concat(s.cos_year,'-',s.semester) as semester,\
     if(sum(if(s.pass_fail = '不通過', cd.cos_credit, 0)*2 )\
     >= sum(if(1, cd.cos_credit, 0)), 'true', 'false') as failed\
-    ,sum(s.score*cd.cos_credit)/sum(cd.cos_credit) as avg\
+    ,sum(s.score*cd.cos_credit)/sum(if(s.score_type='通過不通過',0,cd.cos_credit)) as avg\
     ,sum(if(s.pass_fail = '通過', cd.cos_credit, 0)) as credit\
     from\
     (\
-        select s.student_id, cs.pass_fail, cs.cos_year, cs.semester, cs.cos_id, cs.score\
+        select s.student_id, cs.pass_fail, cs.cos_year, cs.semester, cs.cos_id, cs.score,cs.score_type\
         from student as s, cos_score as cs\
         where s.student_id = :id\
         and cs.student_id = :id\
@@ -450,3 +443,70 @@ exports.ShowSemesterScore = "\
     where cd.unique_id = concat(s.cos_year, '-', s.semester, '-', s.cos_id)\
     group by concat(s.cos_year,'-',s.semester)\
     ";
+
+exports.ShowUserOffsetApplyFormSingle = "\
+    select body.*,if(pre.previous=1,1,0) as previous\
+    from\
+    (\
+        select o.*,s.sname,s.phone\
+        from offset_apply_form as o,student as s\
+        where o.student_id = :student_id\
+        and o.student_id = s.student_id\
+    ) as body\
+    left outer join\
+    (\
+        select o.cos_cname_old, o.cos_code_old, 1 as previous\
+        from offset_apply_form as o\
+        where \
+        o.cos_cname_old in\
+        (\
+            select cos_cname_old\
+            from offset_apply_form\
+            where agree = 1 or agree = 2\
+        )\
+        and o.cos_code_old in\
+        (\
+            select cos_code_old\
+            from offset_apply_form\
+            where agree = 1 or agree = 2\
+        )\
+        group by cos_cname_old, cos_code_old\
+    ) as pre\
+    on pre.cos_cname_old = body.cos_cname_old\
+    and pre.cos_code_old = body.cos_code_old";
+
+exports.ShowUserOffsetApplyFormAll = "\
+    select body.*,if(pre.previous=1,1,0) as previous\
+    from\
+    (\
+        select o.*,s.sname,s.phone\
+        from offset_apply_form as o,student as s\
+        where o.student_id = s.student_id\
+    ) as body\
+    left outer join\
+    (\
+        select o.cos_cname_old, o.cos_code_old, 1 as previous\
+        from offset_apply_form as o\
+        where \
+        o.cos_cname_old in\
+        (\
+            select cos_cname_old\
+            from offset_apply_form\
+            where agree = 1 or agree = 2\
+        )\
+        and o.cos_code_old in\
+        (\
+            select cos_code_old\
+            from offset_apply_form\
+            where agree = 1 or agree = 2\
+        )\
+        group by cos_cname_old, cos_code_old\
+    ) as pre\
+    on pre.cos_cname_old = body.cos_cname_old\
+    and pre.cos_code_old = body.cos_code_old";
+
+exports.ShowGivenGradeStudent = "\
+    select sname, student_id, program, graduate,\
+    if(substring(program,1,2)='資工' or substring(program,1,2)='網多' or substring(program,1,2)='資電',1,0) as status\
+    from student\
+    where grade = :grade";

@@ -1,9 +1,7 @@
 import React from 'react'
 import axios from 'axios'
-import Snackbar from 'material-ui/Snackbar'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import RaisedButton from 'material-ui/RaisedButton'
 
 // for bootstrap 3
 import {Button, Glyphicon} from 'react-bootstrap'
@@ -99,14 +97,14 @@ export default class ChangeTitleDialog extends React.Component {
     }else if(status === 1){
       this.setState({open: false})
       console.log('research_title: ' + this.props.title)
-      console.log('tname: ' + this.props.idCard.name)
+      console.log('tname: ' + this.props.idCard.tname)
       console.log('first_second: ' + this.props.firstSecond)
-      console.log('year: ' + this.props.yaer)
+      console.log('year: ' + this.props.year)
       console.log('new_title: ' + this.state.title)
 
       axios.post('/professors/students/setResearchTitle', {
         research_title: this.props.title,
-        tname: this.props.idCard.name,
+        tname: this.props.idCard.tname,
         first_second: this.props.firstSecond,
         year: this.props.year,
         new_title: this.state.title
@@ -127,7 +125,6 @@ export default class ChangeTitleDialog extends React.Component {
   }
 
   render () {
-    const students = this.props.participants
     const actions = [
       <FlatButton
         label='送出'

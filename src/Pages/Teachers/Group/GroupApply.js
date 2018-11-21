@@ -5,7 +5,6 @@ import { Grid, Row, Col } from 'react-bootstrap'
 import defaultPic from '../../../Resources/defalt.jpg'
 import ReplyDialog from './ReplyDialog'
 import InfoCard from '../Shared/InfoCard'
-import Loading from '../../../Components/Loading'
 // mui
 import Avatar from 'material-ui/Avatar'
 import Chip from 'material-ui/Chip'
@@ -275,18 +274,18 @@ class GroupApply extends React.Component {
             <div style={styles.noticeTitle} onClick={() => this.fetchData()}> 學生專題申請 </div>
           </Col>
 
-          {/*<Col xs={12} md={4} lg={4}>*/}
-            {/*<div style={styles.subTitle}>*/}
-              {/*尚可接受專題生數量: {csNum <= 7 ? 7 - csNum + '人' : <span style={{color: 'red', fontWeight: 'bold'}}>(已超收學生)</span> }*/}
-            {/*</div>*/}
-          {/*</Col>*/}
+          <Col xs={12} md={4} lg={4}>
+            <div style={styles.subTitle}>
+              尚可接受專題生數量: {csNum <= 7 ? 7 - csNum + '人' : <span style={{color: 'red', fontWeight: 'bold'}}>(已超收學生)</span> }
+            </div>
+          </Col>
 
-          {/*<Col xs={12} md={4} lg={4}>*/}
-            {/*<div style={styles.subHintTitle}>*/}
-              {/*<StudentStatusHint status={1}/>*/}
-              {/*<StudentStatusHint status={0}/>*/}
-            {/*</div>*/}
-          {/*</Col>*/}
+          <Col xs={12} md={4} lg={4}>
+            <div style={styles.subHintTitle}>
+              <StudentStatusHint status={1}/>
+              <StudentStatusHint status={0}/>
+            </div>
+          </Col>
 
         </Row>
         <Row style={styles.groups}>
@@ -300,6 +299,7 @@ class GroupApply extends React.Component {
               this.state.applyList.map((item, i) => (
                 <ApplyButton
                   key={i}
+                  keyId={i}
                   item={item}
                   idCard={this.props.idCard}
                   parentFunction={this.triggerUpdate}
@@ -328,7 +328,7 @@ const StudentStatusHint = (props) => (
 
 const ApplyButton = (props) => {
   return (
-    <Grid style={styles.groupBtn}>
+    <Grid style={styles.groupBtn} key={props.keyId}>
       <Row style={{marginBottom: '10px'}}>
         <Col xs={12} md={12} lg={12}>
           <ReplyDialog
@@ -344,7 +344,10 @@ const ApplyButton = (props) => {
       </Row>
       <Row>
         <Col xs={12} md={12} lg={12}>
-          <div style={styles.groupTitle}>{props.item.research_title}</div>
+          <div style={styles.groupTitle}>
+            <span className='apply-btn-year'>{props.item.year}</span>
+            {props.item.research_title}
+          </div>
           <div>
             <MuiThemeProvider>
               <div style={styles.chipWrapper}>
@@ -352,8 +355,7 @@ const ApplyButton = (props) => {
                   <div key={i}>
 
                     <Chip style={styles.chip }
-                          // backgroundColor={ p.student_status === 1 ? '#BDD8CC' : '#FFCD80' }
-                          backgroundColor={ 1 ? '#BDD8CC' : '#FFCD80' }
+                          backgroundColor={ p.student_status === 1 ? '#BDD8CC' : '#FFCD80' }
                           key={i}
                           onClick={() => props.handleChip(props.key + p.student_id)}>
                       <Avatar src={defaultPic}/> {p.student_id} {p.sname}
@@ -364,7 +366,7 @@ const ApplyButton = (props) => {
                       <Dialog
                         key={i}
                         modal={false}
-                        open={props.chipOpen.get(props.key + p.student_id)}
+                        open={props.chipOpen.size === 0 ? false : props.chipOpen.get(props.key + p.student_id)}
                         onRequestClose={() => props.handleRequestClose()}
                         autoScrollBodyContent
                         contentStyle={{maxWidth: 'none', width: '90%', position: 'absolute', top: 0, left: '5%'}}
@@ -372,7 +374,7 @@ const ApplyButton = (props) => {
                         <InfoCard
                           key={i}
                           student={p}
-                          sender={props.idCard.name}
+                          sender={props.idCard.tname}
                           sender_email={props.idCard.email}
                         />
                       </Dialog>

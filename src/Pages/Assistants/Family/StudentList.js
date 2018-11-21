@@ -1,13 +1,13 @@
 import React from 'react'
 import { withStyles } from '@material-ui/core/styles'
-import { 
+import {
   Paper,
   Table,
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableRow, 
-  Dialog, 
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Dialog,
   DialogContent,
   Slide,
   Button
@@ -16,7 +16,7 @@ import NavigationIcon from '@material-ui/icons/Navigation'
 import Frame from '../../../Components/Frame'
 import { Link } from 'react-router-dom'
 import InfoCard from './InfoCard'
-import FakeData from '../../../Resources/FakeData'
+// import FakeData from '../../../Resources/FakeData'
 import axios from 'axios'
 import {connect} from 'react-redux'
 
@@ -170,7 +170,7 @@ class StudentList extends React.Component{
           fullWidth={true}
         >
           <DialogContent>
-            <InfoCard 
+            <InfoCard
               selected={this.state.studentList[this.state.chooseInfo]}
               sender={this.props.idCard.id}
               sender_email={this.props.idCard.email}

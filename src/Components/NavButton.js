@@ -1,5 +1,5 @@
 import React from 'react'
-import {NavItem,Glyphicon} from 'react-bootstrap'
+import { NavItem } from 'react-bootstrap'
 
 const style = {
   Icon: {
@@ -9,7 +9,7 @@ const style = {
     transition: 'all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
   },
   IconSelected: {
-    color: 'rgb(0, 188, 212)',
+    color: '#68BB66',
   },
   Label: {
     lineHeight: '15px',
@@ -17,7 +17,7 @@ const style = {
   },
   LabelSelected: {
     fontSize: 14,
-    color: 'rgb(0, 188, 212)',
+    color: '#68BB66',
   },
 }
 

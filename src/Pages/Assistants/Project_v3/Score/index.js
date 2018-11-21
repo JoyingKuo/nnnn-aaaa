@@ -1,21 +1,21 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { withStyles } from '@material-ui/core/styles';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import purple from '@material-ui/core/colors/purple';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
+import { withStyles } from '@material-ui/core/styles'
+import FormControl from '@material-ui/core/FormControl'
+import Input from '@material-ui/core/Input'
+import InputLabel from '@material-ui/core/InputLabel'
+import MenuItem from '@material-ui/core/MenuItem'
+import Select from '@material-ui/core/Select'
 import ScoreList from './ScoreList'
-import FirstPage from '@material-ui/icons/FirstPage';
-import ChevronLeft from '@material-ui/icons/ChevronLeft';
-import ChevronRight from '@material-ui/icons/ChevronRight';
-import LastPage from '@material-ui/icons/LastPage';
+import FirstPage from '@material-ui/icons/FirstPage'
+import ChevronLeft from '@material-ui/icons/ChevronLeft'
+import ChevronRight from '@material-ui/icons/ChevronRight'
+import LastPage from '@material-ui/icons/LastPage'
 import { fetchScores, downloadCsv } from '../../../../Redux/Assistants/Actions/Project_v3/Score'
-import grey from '@material-ui/core/colors/grey';
-import Button from '@material-ui/core/Button';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import grey from '@material-ui/core/colors/grey'
+import Button from '@material-ui/core/Button'
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload'
+import { CSVLink } from "react-csv"
 
 
 const styles = theme => ({
@@ -28,13 +28,13 @@ const styles = theme => ({
   cssLabel: {
     fontSize: 18,
     '&$cssFocused': {
-      color: 'rgb(0, 188, 212)'
+      color: '#68BB66'
     },
   },
   cssFocused: {},
   cssUnderline: {
     '&:after': {
-      borderBottomColor: 'rgb(0, 188, 212)'
+      borderBottomColor: '#68BB66'
     },
   },
   icon: {
@@ -65,27 +65,40 @@ class index extends React.Component {
       input: "",
       page: 0,
       number_per_page: 10,
-      first_second: "1"
+      first_second: "1",
+      panel_open: [...Array(10)].map( (x) => true)
     }
     props.fetch_scores({ semester: this.state.semester, first_second: this.state.first_second })
+    props.download_csv({ semester: this.state.semester, first_second: this.state.first_second })
   }
 
   filter = (scores) => {
     const { input } = this.state
     return (
-      scores.filter( (student) => input === ''
-                          || student.student.name.toLowerCase().search(input.toLowerCase()) !== -1
-                          || student.student.id.search(input) !== -1
-                          || student.professor_name.toLowerCase().search(input.toLowerCase()) !== -1
+      scores.filter( (student) =>
+         input === ''
+      || student.student.name.toLowerCase().search(input.toLowerCase()) !== -1
+      || student.student.id.search(input) !== -1
+      || student.professor_name.toLowerCase().search(input.toLowerCase()) !== -1
       )
     )
   }
 
+  fuck = () => {
+    let data = this.props.csvData
+    if(this.props.start)
+      return ''
+    return <CSVLink
+      data={data}>
+      下載
+    </CSVLink>
+  }
+
   render() {
 
-    const { classes, fetch_scores, scores, download_csv } = this.props
-    const { input, page, number_per_page, semester, max_page, first_second } = this.state
-
+    const { classes, fetch_scores, scores, download_csv, csvData } = this.props
+    const { input, page, number_per_page, semester, first_second } = this.state
+    console.log(csvData)
     return (
       <div className = { classes.root } >
         <div className = 'row' style = {{ marginTop: '30px', marginBottom: '20px' }}>
@@ -131,6 +144,7 @@ class index extends React.Component {
                 onChange={
                   (event) => {
                     fetch_scores({ first_second, semester: event.target.value })
+                    download_csv({ first_second, semester: event.target.value })
                     this.setState({ semester: event.target.value, page: 0 })
                   }
                 }
@@ -165,6 +179,7 @@ class index extends React.Component {
                 onChange={
                   (event) => {
                     fetch_scores({ first_second: event.target.value, semester })
+                    download_csv({ first_second: event.target.value, semester })
                     this.setState({ first_second: event.target.value, page: 0 })
                   }
                 }
@@ -175,8 +190,11 @@ class index extends React.Component {
             </FormControl>
           </div>
           <div className = 'col-md-2 col-lg-2 col-xs-12' >
-            <Button variant="contained" className={classes.button} onClick = { () => download_csv({ semester, first_second})}>
+            <Button variant="contained" className={classes.button}
+                    // onClick = { () => download_csv({ semester, first_second})}
+            >
               <CloudDownloadIcon style = {{ fontSize: '20px' }}/>
+              {this.fuck()}
             </Button>
           </div>
         </div>
@@ -187,7 +205,7 @@ class index extends React.Component {
             }
           />
         </div>
-        <div style = {{ textAlign: 'center', marginTop: '10px' }} >
+        <div style = {{ textAlign: 'center', marginTop: '10px', marginBottom: '50px' }} >
           <FirstPage className = { classes.icon } onClick = { () => this.setState({ page: 0 }) } />
           <ChevronLeft className = { classes.icon } onClick = { () => this.setState({ page: Math.max(0, page - 1) }) } />
           <span style = {{
@@ -197,8 +215,8 @@ class index extends React.Component {
             marginRight: '20px',
             marginLeft: '20px'
           }}>{page + 1} / { Math.max(1, Math.ceil(this.filter(scores).length / number_per_page)) }</span>
-          <ChevronRight className = { classes.icon } onClick = { () => this.setState({ page: Math.min(Math.ceil(this.filter(scores).length / number_per_page) - 1, page + 1) }) } />
-          <LastPage className = { classes.icon } onClick = { () => this.setState({ page: Math.ceil(this.filter(scores).length / number_per_page) - 1 }) } />
+          <ChevronRight className = { classes.icon } onClick = { () => this.setState({ page: Math.max(0, Math.min(Math.ceil(this.filter(scores).length / number_per_page) - 1, page + 1)) }) } />
+          <LastPage className = { classes.icon } onClick = { () => this.setState({ page: Math.max(0, Math.ceil(this.filter(scores).length / number_per_page) - 1) }) } />
         </div>
       </div>
     )
@@ -206,7 +224,10 @@ class index extends React.Component {
 }
 
 const mapStateToProps = (state) => ({
-  scores: state.Assistant.Project.Score.scores
+  scores: state.Assistant.Project.Score.scores,
+  csvData: state.Assistant.Project.Score.csvData,
+  start: state.Assistant.Project.Score.start,
+
 })
 
 const mapDispatchToProps = (dispatch) => ({

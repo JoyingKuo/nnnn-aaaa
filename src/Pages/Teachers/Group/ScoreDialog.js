@@ -1,9 +1,7 @@
 import React from 'react'
 import axios from 'axios'
-import Snackbar from 'material-ui/Snackbar'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import RaisedButton from 'material-ui/RaisedButton'
 
 // for bootstrap 3
 import {Button} from 'react-bootstrap'
@@ -108,7 +106,7 @@ export default class ScoreDialog extends React.Component {
       this.setState({open: false})
     }else if(status === 1 && this.checkAllText() ){
       this.setState({open: false})
-      console.log('tname: ' + this.props.idCard.name)
+      console.log('tname: ' + this.props.idCard.tname)
       console.log('research_title: ' + this.props.title)
       console.log('first_second: ' + this.props.firstSecond)
 
@@ -119,7 +117,7 @@ export default class ScoreDialog extends React.Component {
 
         axios.post('/professors/students/setScore', {
           student_id: item.student_id,
-          tname: this.props.idCard.name,
+          tname: this.props.idCard.tname,
           research_title: this.props.title,
           first_second: this.props.firstSecond,
           year: this.props.year,

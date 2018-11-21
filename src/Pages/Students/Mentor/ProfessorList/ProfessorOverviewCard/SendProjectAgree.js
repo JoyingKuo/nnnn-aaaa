@@ -28,9 +28,6 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import FormControl from '@material-ui/core/FormControl'
-import Select from '@material-ui/core/Select'
-import InputLabel from '@material-ui/core/InputLabel'
 import Grow from '@material-ui/core/Grow'
 import axios from 'axios/index'
 import withMobileDialog from '@material-ui/core/withMobileDialog/index'
@@ -87,10 +84,13 @@ class SendProjectAgree extends React.Component {
     this.handleremovemenber = this.handleremovemenber.bind(this)
     this.handleTitleChange = this.handleTitleChange.bind(this)
     this.handleSend = this.handleSend.bind(this)
+    this.handlepanelChange = this.handlepanelChange.bind(this)
+    this.handleinputChange = this.handleinputChange.bind(this)
+    this.getString = this.getString.bind(this)
   }
 
 
-  handleSend = () => {
+  handleSend () {
     let _this = this
     let phones = []
     let emails = []
@@ -133,6 +133,11 @@ class SendProjectAgree extends React.Component {
             alert(res.data[i].student_id + " 因 " + this.getString(res.data[i].status) + " 申請失敗")
             return
           }
+          if(res.data[i].status === '2'){
+            let r = window.confirm('注意!如果您確定送出表單且教授也同意了，' + res.data[i].student_id + '同學將會修改專題二（意同於更改專題）請按確定以繼續')
+            if(!r)return
+          }
+
           stateString.push(res.data[i].status)
         }
 
@@ -229,17 +234,13 @@ class SendProjectAgree extends React.Component {
     })
   }
 
-  handleProjectNumChange = name => event => {
-    this.setState({ [name]: event.target.value })
-  }
-
-  handleinputChange = (event, str, index) => {
+  handleinputChange (event, str, index) {
     let newinput = [...this.state.input]
     newinput[index][str] = event.target.value
     this.setState({ input: newinput })
   }
 
-  getString = (str) => {
+  getString (str) {
     if(str === '1'){
       return '專題一'
     }
@@ -269,7 +270,7 @@ class SendProjectAgree extends React.Component {
             <ListItemIcon>
               <Face />
             </ListItemIcon>
-            <ListItemText inset primary={`寄送專題申請！`} />
+            <ListItemText inset primary={`專題申請/專題變更`} />
           </MenuItem>
           : <Tooltip title='寄送專題申請！' placement='top' classes={{tooltip:classes.tooltip}}>
             <IconButton
